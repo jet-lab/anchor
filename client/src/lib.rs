@@ -56,7 +56,7 @@ impl<'a> Client<'a> {
         }
     }
 
-    pub fn program(&self, program_id: Pubkey) -> Program {
+    pub fn program(&self, program_id: Pubkey) -> Program<'a> {
         Program {
             program_id,
             cfg: Config {
@@ -87,7 +87,7 @@ impl<'a> Program<'a> {
     }
 
     /// Returns a request builder.
-    pub fn request(&self) -> RequestBuilder {
+    pub fn request(&self) -> RequestBuilder<'a> {
         RequestBuilder::from(
             self.program_id,
             self.cfg.cluster.url(),
@@ -98,7 +98,7 @@ impl<'a> Program<'a> {
     }
 
     /// Returns a request builder for program state.
-    pub fn state_request(&self) -> RequestBuilder {
+    pub fn state_request(&self) -> RequestBuilder<'a> {
         RequestBuilder::from(
             self.program_id,
             self.cfg.cluster.url(),

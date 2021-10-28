@@ -36,7 +36,7 @@ pub struct Client<'a> {
 }
 
 impl<'a> Client<'a> {
-    pub fn new(cluster: Cluster, payer: &'a dyn Signer) -> Client<'a> {
+    pub fn new(cluster: Cluster, payer: &'a dyn Signer) -> Self {
         Self {
             cfg: Config {
                 cluster,
@@ -46,7 +46,7 @@ impl<'a> Client<'a> {
         }
     }
 
-    pub fn new_with_options(cluster: Cluster, payer: &'a dyn Signer, options: CommitmentConfig) -> Client<'a> {
+    pub fn new_with_options(cluster: Cluster, payer: &'a dyn Signer, options: CommitmentConfig) -> Self {
         Self {
             cfg: Config {
                 cluster,

@@ -46,7 +46,11 @@ impl<'a> Client<'a> {
         }
     }
 
-    pub fn new_with_options(cluster: Cluster, payer: &'a dyn Signer, options: CommitmentConfig) -> Self {
+    pub fn new_with_options(
+        cluster: Cluster,
+        payer: &'a dyn Signer,
+        options: CommitmentConfig,
+    ) -> Self {
         Self {
             cfg: Config {
                 cluster,

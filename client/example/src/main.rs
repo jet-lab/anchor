@@ -51,7 +51,7 @@ fn main() -> Result<()> {
     );
 
     // Client.
-    let client = Client::new_with_options(url, &payer, CommitmentConfig::processed());
+    let client = Client::new_with_options(url, payer, CommitmentConfig::processed());
 
     // Run tests.
     composite(&client, opts.composite_pid)?;

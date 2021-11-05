@@ -13,7 +13,7 @@ use solana_client::rpc_client::RpcClient;
 use solana_client::rpc_config::{RpcTransactionLogsConfig, RpcTransactionLogsFilter};
 use solana_client::rpc_response::{Response as RpcResponse, RpcLogsResponse};
 use solana_sdk::commitment_config::CommitmentConfig;
-use solana_sdk::signature::{Keypair, Signature, Signer};
+use solana_sdk::signature::{Signature, Signer};
 use solana_sdk::transaction::Transaction;
 use std::convert::Into;
 use std::rc::Rc;
@@ -37,29 +37,7 @@ pub struct Client {
 }
 
 impl Client {
-    #[deprecated(note = "use `new_generic`")]
-    pub fn new(cluster: Cluster, payer: Keypair) -> Self {
-        Self {
-            cfg: Config {
-                cluster,
-                payer: Rc::new(payer),
-                options: None,
-            },
-        }
-    }
-
-    #[deprecated(note = "use `new_generic_with_options`")]
-    pub fn new_with_options(cluster: Cluster, payer: Keypair, options: CommitmentConfig) -> Self {
-        Self {
-            cfg: Config {
-                cluster,
-                payer: Rc::new(payer),
-                options: Some(options),
-            },
-        }
-    }
-
-    pub fn new_generic(cluster: Cluster, payer: Rc<dyn Signer>) -> Self {
+    pub fn new(cluster: Cluster, payer: Rc<dyn Signer>) -> Self {
         Self {
             cfg: Config {
                 cluster,
@@ -69,7 +47,7 @@ impl Client {
         }
     }
 
-    pub fn new_generic_with_options(
+    pub fn new_with_options(
         cluster: Cluster,
         payer: Rc<dyn Signer>,
         options: CommitmentConfig,

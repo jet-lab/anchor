@@ -22,6 +22,7 @@ use composite::accounts::{Bar, CompositeUpdate, Foo, Initialize};
 use composite::instruction as composite_instruction;
 use composite::{DummyA, DummyB};
 use rand::rngs::OsRng;
+use std::rc::Rc;
 use std::time::Duration;
 
 #[derive(Parser, Debug)]

@@ -16,6 +16,7 @@ use solana_sdk::commitment_config::CommitmentConfig;
 use solana_sdk::signature::{Signature, Signer};
 use solana_sdk::transaction::Transaction;
 use std::convert::Into;
+use std::rc::Rc;
 use thiserror::Error;
 
 pub use anchor_lang;
@@ -31,16 +32,16 @@ pub type EventHandle = PubsubClientSubscription<RpcResponse<RpcLogsResponse>>;
 /// Client defines the base configuration for building RPC clients to
 /// communitcate with Anchor programs running on a Solana cluster. It's
 /// primary use is to build a `Program` client via the `program` method.
-pub struct Client<'a> {
-    cfg: Config<'a>,
+pub struct Client {
+    cfg: Config,
 }
 
-impl<'a> Client<'a> {
-    pub fn new(cluster: Cluster, payer: &'a dyn Signer) -> Self {
+impl Client {
+    pub fn new(cluster: Cluster, payer: Rc<dyn Signer>) -> Self {
         Self {
             cfg: Config {
                 cluster,
-                payer,
+                payer: payer,
                 options: None,
             },
         }
@@ -48,65 +49,65 @@ impl<'a> Client<'a> {
 
     pub fn new_with_options(
         cluster: Cluster,
-        payer: &'a dyn Signer,
+        payer: Rc<dyn Signer>,
         options: CommitmentConfig,
     ) -> Self {
         Self {
             cfg: Config {
                 cluster,
-                payer,
+                payer: payer,
                 options: Some(options),
             },
         }
     }
 
-    pub fn program(&self, program_id: Pubkey) -> Program<'a> {
+    pub fn program(&self, program_id: Pubkey) -> Program {
         Program {
             program_id,
             cfg: Config {
                 cluster: self.cfg.cluster.clone(),
                 options: self.cfg.options,
-                payer: self.cfg.payer,
+                payer: self.cfg.payer.clone(),
             },
         }
     }
 }
 
 // Internal configuration for a client.
-struct Config<'a> {
+struct Config {
     cluster: Cluster,
-    payer: &'a dyn Signer,
+    payer: Rc<dyn Signer>,
     options: Option<CommitmentConfig>,
 }
 
 /// Program is the primary client handle to be used to build and send requests.
-pub struct Program<'a> {
+pub struct Program {
     program_id: Pubkey,
-    cfg: Config<'a>,
+    cfg: Config,
 }
 
-impl<'a> Program<'a> {
+impl Program {
     pub fn payer(&self) -> Pubkey {
         self.cfg.payer.pubkey()
     }
 
     /// Returns a request builder.
-    pub fn request(&self) -> RequestBuilder<'a> {
+    pub fn request(&self) -> RequestBuilder {
         RequestBuilder::from(
             self.program_id,
             self.cfg.cluster.url(),
-            self.cfg.payer,
+            self.cfg.payer.clone(),
             self.cfg.options,
             RequestNamespace::Global,
         )
     }
 
     /// Returns a request builder for program state.
-    pub fn state_request(&self) -> RequestBuilder<'a> {
+    pub fn state_request(&self) -> RequestBuilder {
         RequestBuilder::from(
             self.program_id,
             self.cfg.cluster.url(),
-            self.cfg.payer,
+            self.cfg.payer.clone(),
             self.cfg.options,
             RequestNamespace::State { new: false },
         )
@@ -322,7 +323,7 @@ pub struct RequestBuilder<'a> {
     accounts: Vec<AccountMeta>,
     options: CommitmentConfig,
     instructions: Vec<Instruction>,
-    payer: &'a dyn Signer,
+    payer: Rc<dyn Signer>,
     // Serialized instruction data for the target RPC.
     instruction_data: Option<Vec<u8>>,
     signers: Vec<&'a dyn Signer>,
@@ -344,7 +345,7 @@ impl<'a> RequestBuilder<'a> {
     pub fn from(
         program_id: Pubkey,
         cluster: &str,
-        payer: &'a dyn Signer,
+        payer: Rc<dyn Signer>,
         options: Option<CommitmentConfig>,
         namespace: RequestNamespace,
     ) -> Self {
@@ -361,7 +362,7 @@ impl<'a> RequestBuilder<'a> {
         }
     }
 
-    pub fn payer(mut self, payer: &'a dyn Signer) -> Self {
+    pub fn payer(mut self, payer: Rc<dyn Signer>) -> Self {
         self.payer = payer;
         self
     }
@@ -448,7 +449,7 @@ impl<'a> RequestBuilder<'a> {
         }
 
         let mut signers = self.signers;
-        signers.push(self.payer);
+        signers.push(&*self.payer);
 
         let rpc_client = RpcClient::new_with_commitment(self.cluster, self.options);
 

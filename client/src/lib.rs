@@ -37,6 +37,7 @@ pub struct Client {
 }
 
 impl Client {
+    #[deprecated(note="use `new_generic`")]
     pub fn new(cluster: Cluster, payer: Keypair) -> Self {
         Self {
             cfg: Config {
@@ -47,6 +48,7 @@ impl Client {
         }
     }
 
+    #[deprecated(note="use `new_generic_with_options`")]
     pub fn new_with_options(
         cluster: Cluster,
         payer: Keypair,
@@ -65,7 +67,7 @@ impl Client {
         Self {
             cfg: Config {
                 cluster,
-                payer: payer,
+                payer,
                 options: None,
             },
         }
@@ -79,7 +81,7 @@ impl Client {
         Self {
             cfg: Config {
                 cluster,
-                payer: payer,
+                payer,
                 options: Some(options),
             },
         }
